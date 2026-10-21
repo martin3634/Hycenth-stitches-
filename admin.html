@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Panel — Hycenth Stitches Collection</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ============ AUTH VIEW (login / first-run setup) ============ -->
+<div class="auth-view" id="authView">
+    <div class="auth-card">
+        <div class="brand auth-brand">
+            <span class="brand-main">Hycenth</span>
+            <span class="brand-sub">Admin Panel</span>
+        </div>
+
+        <!-- Login -->
+        <form id="loginForm" class="auth-form" hidden>
+            <h2 id="loginTitle">Welcome back</h2>
+            <p class="auth-sub">Sign in to manage your store.</p>
+
+            <label class="field">
+                <span>Username</span>
+                <input type="text" id="loginUser" autocomplete="username" required placeholder="Admin username">
+            </label>
+
+            <label class="field">
+                <span>Email</span>
+                <input type="email" id="loginEmail" autocomplete="email" required placeholder="you@example.com">
+            </label>
+
+            <p class="auth-statement">
+                <strong>This email is saved with your admin account.</strong>
+                It is the address a one-time code is sent to when you use
+                &ldquo;Forgot password&rdquo;, so always sign in with the same email.
+                Change it any time from <strong>Account &amp; Data</strong>.
+            </p>
+
+            <label class="field">
+                <span>Password</span>
+                <span class="pw-wrap">
+                    <input type="password" id="loginPass" autocomplete="current-password" required placeholder="Your password">
+                    <button type="button" class="pw-toggle" id="loginPassToggle"
+                            title="Show password" aria-label="Show password" aria-pressed="false">Show</button>
+                </span>
+            </label>
+
+            <p class="auth-err" id="loginErr" role="alert"></p>
+
+            <button class="btn solid full" type="submit" id="loginBtn">Sign In</button>
+
+            <button type="button" class="auth-link" id="forgotBtn">Forgot password?</button>
+        </form>
+
+        <!-- Forgot password (email -> OTP -> new password) -->
+        <div id="forgotForm" class="auth-form" hidden>
+            <h2>Reset your password</h2>
+            <p class="auth-sub" id="fpSub">Enter your recovery email to receive a 6-digit one-time code.</p>
+
+            <!-- step 1 — email -->
+            <div id="fpStep1">
+                <label class="field">
+                    <span>Recovery email</span>
+                    <input type="email" id="fpEmail" autocomplete="email" placeholder="you@example.com">
+                    <span class="hint">Use the same email you sign in with — the 6-digit code is sent there.</span>
+                </label>
+
+                <p class="auth-err" id="fpErr1" role="alert"></p>
+
+                <button class="btn solid full" type="button" id="fpSendBtn">Send code</button>
+            </div>
+
+            <!-- step 2 — one-time code -->
+            <div id="fpStep2" hidden>
+                <label class="field">
+                    <span>6-digit code</span>
+                    <input type="text" id="fpOtp" class="otp-input" inputmode="numeric" maxlength="6"
+                           autocomplete="one-time-code" placeholder="000000">
+                </label>
+
+                <p class="auth-sub fp-note" id="fpOtpNote"></p>
+                <p class="auth-err" id="fpErr2" role="alert"></p>
+
+                <button class="btn solid full" type="button" id="fpVerifyBtn">Verify code</button>
+
+                <div class="fp-row">
+                    <button class="btn ghost small" type="button" id="fpResendBtn">Resend code</button>
+                    <button class="btn ghost small" type="button" id="fpEditEmailBtn">Change email</button>
+                </div>
+                <button type="button" class="auth-link" id="fpInboxBtn">Send the code to my inbox</button>
+                <p class="auth-err" id="fpErr2b" role="alert"></p>
+            </div>
+
+            <!-- step 3 — new password -->
+            <div id="fpStep3" hidden>
+                <label class="field">
+                    <span>New password</span>
+                    <input type="password" id="fpNewPass" autocomplete="new-password" minlength="6"
+                           placeholder="At least 6 characters">
+                </label>
+
+                <label class="field">
+                    <span>Confirm new password</span>
+                    <input type="password" id="fpNewPass2" autocomplete="new-password" minlength="6"
+                           placeholder="Repeat password">
+                </label>
+
+                <p class="auth-err" id="fpErr3" role="alert"></p>
+
+                <button class="btn solid full" type="button" id="fpSaveBtn">Update password</button>
+            </div>
+
+            <button type="button" class="auth-back" id="fpBackBtn">Back to sign in</button>
+        </div>
+
+        <!-- First-run setup -->
+        <form id="setupForm" class="auth-form" hidden>
+            <h2>Create admin account</h2>
+            <p class="auth-sub">First time here? Set up the owner account for this store.</p>
+
+            <label class="field">
+                <span>Username</span>
+                <input type="text" id="setupUser" autocomplete="username" required minlength="3"
+                       placeholder="At least 3 characters">
+            </label>
+
+            <label class="field">
+                <span>Password</span>
+                <input type="password" id="setupPass" autocomplete="new-password" required minlength="6"
+                       placeholder="At least 6 characters">
+            </label>
+
+            <label class="field">
+                <span>Confirm password</span>
+                <input type="password" id="setupPass2" autocomplete="new-password" required minlength="6"
+                       placeholder="Repeat password">
+            </label>
+
+            <label class="field">
+                <span>Sign-in email</span>
+                <input type="email" id="setupEmail" autocomplete="email" placeholder="you@example.com">
+                <span class="hint">The email you will sign in with. A one-time code is sent
+                    here if you ever forget your password.</span>
+            </label>
+
+            <p class="auth-err" id="setupErr" role="alert"></p>
+
+            <button class="btn solid full" type="submit" id="setupBtn">Create Account</button>
+        </form>
+
+        <a class="auth-back" href="index.html"> Back to website</a>
+    </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div class="admin-shell hidden" id="adminApp">
+
+    <!-- Sidebar -->
+    <aside class="admin-side" id="adminSide">
+        <div class="side-head">
+            <div class="brand">
+                <span class="brand-main">Hycenth</span>
+                <span class="brand-sub">Admin Panel</span>
+            </div>
+            <button class="side-close" id="sideClose" aria-label="Close menu"></button>
+        </div>
+
+        <nav class="side-nav">
+            <button class="side-link active" data-view="dashboard">
+                <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 9h8V3h-8z"/></svg>
+                Dashboard
+            </button>
+            <button class="side-link" data-view="products">
+                <svg viewBox="0 0 24 24"><path d="M20.6 8.4l-8-5.2a1 1 0 0 0-1.2 0l-8 5.2A1 1 0 0 0 3 9.3V20a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9.3a1 1 0 0 0-.4-.9zM12 4.7l6.4 4.2L12 13.1 5.6 8.9z"/></svg>
+                Products
+                <span class="side-count" id="navProductCount">0</span>
+            </button>
+            <button class="side-link" data-view="content">
+                <svg viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 11.2c-2.1 0-4-1.1-5-2.7.1-1.6 3.3-2.5 5-2.5s4.9.9 5 2.5c-1 1.6-2.9 2.7-5 2.7z"/></svg>
+                Site Content
+            </button>
+            <button class="side-link" data-view="whatsapp">
+                <svg viewBox="0 0 24 24"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.17-1.35a9.9 9.9 0 0 0 4.87 1.24h.01c5.5 0 9.96-4.46 9.96-9.96A9.9 9.9 0 0 0 19.1 4.9 9.9 9.9 0 0 0 12.04 2zm5.8 14.16c-.24.68-1.4 1.32-1.94 1.36-.54.04-1.02.24-3.44-.72-2.9-1.14-4.72-4.08-4.86-4.28-.14-.2-1.16-1.54-1.16-2.94 0-1.4.74-2.08 1-2.38.26-.3.58-.36.76-.36.18 0 .38 0 .54.02.18.02.42-.04.66.5.24.56.82 1.94.88 2.08.06.14.1.3.02.48-.08.18-.12.3-.24.46-.12.16-.26.36-.36.48-.12.12-.26.26-.1.5.16.24.7 1.16 1.5 1.9 1.04.92 1.9 1.2 2.16 1.34.26.14.42.12.58-.06.16-.18.66-.78.84-1.04.18-.26.34-.22.56-.14.22.08 1.42.68 1.66.8.24.12.4.18.46.28.06.1.06.58-.14 1.28z"/></svg>
+                WhatsApp Tools
+            </button>
+            <button class="side-link" data-view="account">
+                <svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V20h9v-2.5c0-1 .4-1.9 1-2.6A13 13 0 0 0 8 14zm8 0c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg>
+                Account  Data
+            </button>
+        </nav>
+
+        <div class="side-foot">
+            <a class="side-link plain" href="index.html" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14zM5 5h5v2H7v10h10v-3h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>
+                View website
+            </a>
+            <button class="side-link danger" id="logoutBtn">
+                <svg viewBox="0 0 24 24"><path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4v-2H6V5h4zm5.2 4.6L18.6 11l3.4 3.4-3.4 3.4-3.4-3.4-1.4 1.4L15.6 19l-1.4 1.4-4-4 1.4-1.4L12 16.6l3.4-3.4-3.4-3.4z" transform="scale(-1,1) translate(-24,0)"/></svg>
+                Log out
+            </button>
+        </div>
+    </aside>
+    <div class="side-scrim" id="sideScrim"></div>
+
+    <!-- Main -->
+    <div class="admin-main">
+        <header class="admin-top">
+            <button class="menu-btn admin-menu" id="adminMenu" aria-label="Menu"></button>
+            <h1 id="viewTitle">Dashboard</h1>
+            <div class="top-right">
+                <span class="top-user" id="topUser">admin</span>
+                <button class="btn ghost small" id="topLogout">Log out</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+
+            <!-- ===== DASHBOARD ===== -->
+            <section class="aview active" id="view-dashboard">
+                <div class="stat-grid" id="statGrid"></div>
+
+                <div class="dash-cols">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h2>Recently Added</h2>
+                            <button class="btn ghost small" data-goto="products">Manage all</button>
+                        </div>
+                        <div class="recent-list" id="recentList"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head"><h2>Catalog Split</h2></div>
+                        <div class="split-bars" id="splitBars"></div>
+
+                        <div class="panel-head" style="margin-top:1.4rem"><h2>Quick Actions</h2></div>
+                        <div class="quick-actions">
+                            <button class="btn solid" id="qaAdd">+ Add Product</button>
+                            <button class="btn ghost" data-goto="content">Edit Site Content</button>
+                            <button class="btn ghost" data-goto="products">View Products</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PRODUCTS ===== -->
+            <section class="aview" id="view-products">
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>All Products</h2>
+                        <button class="btn solid" id="addProductBtn">+ Add Product</button>
+                    </div>
+
+                    <div class="toolbar">
+                        <input type="search" id="pSearch" class="ainput grow" placeholder="Search by name...">
+                        <select id="pCat" class="ainput">
+                            <option value="all">All categories</option>
+                            <option value="men">Men's Native</option>
+                            <option value="nurse">Nurses Wear</option>
+                        </select>
+                        <select id="pStatus" class="ainput">
+                            <option value="all">All status</option>
+                            <option value="visible">Visible</option>
+                            <option value="hidden">Hidden</option>
+                        </select>
+                        <select id="pSort" class="ainput">
+                            <option value="newest">Newest first</option>
+                            <option value="name">Name A-Z</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="oldest">Oldest first</option>
+                        </select>
+                    </div>
+
+                    <p class="table-count" id="pCount"></p>
+
+                    <div class="table-wrap">
+                        <table class="atable">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Updated</th>
+                                    <th class="ta-r">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pRows"></tbody>
+                        </table>
+                        <div class="empty hidden" id="pEmpty">No products match your filters.</div>
+                    </div>
+
+                    <div class="pager" id="pPager"></div>
+                </div>
+            </section>
+
+            <!-- ===== SITE CONTENT ===== -->
+            <section class="aview" id="view-content">
+
+                <div class="panel">
+                    <div class="panel-head"><h2>Hero Section</h2></div>
+                    <form id="heroForm" class="cform">
+                        <div class="frow">
+                            <label class="field">
+                                <span>Eyebrow text</span>
+                                <input type="text" id="heroEyebrow" maxlength="90">
+                            </label>
+                            <label class="field">
+                                <span>Heading (main part)</span>
+                                <input type="text" id="heroTitle" maxlength="120">
+                            </label>
+                        </div>
+                        <div class="frow">
+                            <label class="field">
+                                <span>Heading (gold highlight)</span>
+                                <input type="text" id="heroAccent" maxlength="80">
+                            </label>
+                            <label class="field">
+                                <span>Hero paragraph</span>
+                                <input type="text" id="heroText" maxlength="300">
+                            </label>
+                        </div>
+
+                        <p class="sub-label">Slideshow images</p>
+                        <div class="slides" id="slideList"></div>
+                        <button type="button" class="btn ghost small" id="addSlide">+ Add image</button>
+
+                        <p class="form-msg" id="heroMsg"></p>
+                        <button class="btn solid" type="submit">Save Hero</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head"><h2>Feature Cards</h2></div>
+                    <form id="featForm" class="cform">
+                        <div id="featList"></div>
+                        <p class="form-msg" id="featMsg"></p>
+                        <button class="btn solid" type="submit">Save Features</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head"><h2>Contact  Delivery</h2></div>
+                    <form id="contactForm2" class="cform">
+                        <div class="frow">
+                            <label class="field">
+                                <span>Phone (displayed)</span>
+                                <input type="text" id="cPhone" maxlength="40">
+                            </label>
+                            <label class="field">
+                                <span>WhatsApp number (digits only, for links)</span>
+                                <input type="text" id="cWa" maxlength="20" pattern="[0-9]*">
+                            </label>
+                        </div>
+                        <div class="frow">
+                            <label class="field">
+                                <span>Email</span>
+                                <input type="email" id="cMail" maxlength="80">
+                            </label>
+                            <label class="field">
+                                <span>Location</span>
+                                <input type="text" id="cLoc" maxlength="80">
+                            </label>
+                        </div>
+                        <div class="frow">
+                            <label class="field">
+                                <span>Delivery fee </span>
+                                <input type="number" id="dFee" min="0" step="100">
+                            </label>
+                            <label class="field">
+                                <span>Free delivery above </span>
+                                <input type="number" id="dFree" min="0" step="1000">
+                            </label>
+                        </div>
+                        <p class="form-msg" id="contactMsg"></p>
+                        <button class="btn solid" type="submit">Save Contact Delivery</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head"><h2>Payment Details</h2></div>
+                    <form id="payForm" class="cform">
+                        <div class="frow">
+                            <label class="field">
+                                <span>Bank name</span>
+                                <input type="text" id="payBank" maxlength="60">
+                            </label>
+                            <label class="field">
+                                <span>Account number</span>
+                                <input type="text" id="payNum" maxlength="20" pattern="[0-9]*">
+                            </label>
+                        </div>
+                        <label class="field">
+                            <span>Account name</span>
+                            <input type="text" id="payName" maxlength="80">
+                        </label>
+                        <p class="form-msg" id="payMsg"></p>
+                        <button class="btn solid" type="submit">Save Payment Details</button>
+                    </form>
+                </div>
+
+            </section>
+
+            <!-- ===== WHATSAPP TOOLS ===== -->
+            <section class="aview" id="view-whatsapp">
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Payment Request</h2>
+                        <span class="tool-tag">Send when the chat is finished</span>
+                    </div>
+                    <p class="tool-lead">
+                        Fill in the amount and copy this into the WhatsApp chat. It tells the
+                        customer to pay and to send the receipt to your DM.
+                    </p>
+                    <div class="frow">
+                        <label class="field">
+                            <span>Amount to pay (naira)</span>
+                            <input type="number" id="prAmount" min="0" step="100" placeholder="e.g. 214000">
+                        </label>
+                        <label class="field">
+                            <span>Customer name (optional)</span>
+                            <input type="text" id="prName" maxlength="60" placeholder="Leave empty for a general message">
+                        </label>
+                    </div>
+                    <label class="field">
+                        <span>Message</span>
+                        <textarea id="prText" rows="8" class="msg-area"></textarea>
+                        <span class="hint">Edit freely — the copy button always copies exactly what is here.</span>
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn ghost" id="prReset">Rebuild</button>
+                        <button type="button" class="btn solid" id="prCopy">Copy payment request</button>
+                    </div>
+                    <p class="tool-lead" style="margin:.9rem 0 0">
+                        <strong>Fire it with one tap:</strong> in WhatsApp Business go to
+                        <em>Settings → Business tools → Quick replies</em>, save this message as a
+                        shortcut such as <strong>/pay</strong>. While you are chatting, typing
+                        <strong>/pay</strong> then pressing send drops the whole payment request
+                        with your account number into the chat.
+                    </p>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Measurement Request</h2>
+                        <span class="tool-tag">You ask for sizes in the chat</span>
+                    </div>
+                    <p class="tool-lead">
+                        Copy this and send it whenever a customer needs to give you their
+                        measurements for the fit.
+                    </p>
+                    <label class="field">
+                        <span>Message</span>
+                        <textarea id="mrText" rows="10" class="msg-area"></textarea>
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn ghost" id="mrReset">Rebuild</button>
+                        <button type="button" class="btn solid" id="mrCopy">Copy measurement request</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <h2>Reply With Product Images</h2>
+                        <span class="tool-tag">Shows what the customer picked</span>
+                    </div>
+                    <p class="tool-lead">
+                        Search your catalogue, tap a piece to add it to the reply. Each entry
+                        carries the product name, the price and the image link so the customer
+                        sees exactly what they chose.
+                    </p>
+
+                    <label class="field">
+                        <span>Search products</span>
+                        <input type="search" id="prSearch" placeholder="Type a name, e.g. agbada">
+                    </label>
+                    <div class="pick-list" id="prResults"></div>
+
+                    <label class="field">
+                        <span>Reply message</span>
+                        <textarea id="prProductText" rows="8" class="msg-area"></textarea>
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn ghost" id="prpClear">Clear list</button>
+                        <button type="button" class="btn solid" id="prpCopy">Copy reply</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head"><h2>Order Message Settings</h2></div>
+                    <p class="tool-lead">
+                        These control what the customer's own WhatsApp message contains when
+                        they press <strong>Proceed to Payment</strong> on the website.
+                    </p>
+                    <form id="orderForm" class="cform">
+                        <label class="field">
+                            <span>Opening line of their message</span>
+                            <input type="text" id="oIntro" maxlength="200">
+                        </label>
+                        <label class="check">
+                            <input type="checkbox" id="oImages">
+                            <span>Include the image link of every product they picked</span>
+                        </label>
+                        <label class="check">
+                            <input type="checkbox" id="oMeasure">
+                            <span>Also ask them to send their measurements
+                                <span class="hint" style="display:inline">(leave off if you prefer to ask yourself)</span></span>
+                        </label>
+                        <p class="form-msg" id="orderMsg"></p>
+                        <button class="btn solid" type="submit">Save Order Settings</button>
+                    </form>
+                </div>
+
+            </section>
+
+            <!-- ===== ACCOUNT & DATA ===== -->
+            <section class="aview" id="view-account">
+
+                <div class="panel narrow">
+                    <div class="panel-head"><h2>Password Recovery</h2></div>
+                    <form id="recForm" class="cform">
+                        <label class="field">
+                            <span>Sign-in email</span>
+                            <input type="email" id="recEmail" autocomplete="email" placeholder="you@example.com">
+                            <span class="hint">The email you sign in with. The one-time code for
+                                Forgot password is sent to this address.</span>
+                        </label>
+
+                        <label class="field">
+                            <span>Auto-send endpoint (optional)</span>
+                            <input type="url" id="recEndpoint" placeholder="https://formsubmit.co/ajax/you@example.com">
+                            <span class="hint">Leave empty to send the code through your own mail app.
+                                Add a form endpoint to have the code emailed automatically.</span>
+                        </label>
+
+                        <p class="form-msg" id="recMsg"></p>
+                        <button class="btn solid" type="submit">Save Recovery Settings</button>
+                    </form>
+                </div>
+
+                <div class="panel narrow">
+                    <div class="panel-head"><h2>Change Password</h2></div>
+                    <form id="pwForm" class="cform">
+                        <label class="field">
+                            <span>Current password</span>
+                            <input type="password" id="pwCurrent" autocomplete="current-password" required>
+                        </label>
+                        <label class="field">
+                            <span>New password</span>
+                            <input type="password" id="pwNew" autocomplete="new-password" required minlength="6">
+                        </label>
+                        <label class="field">
+                            <span>Confirm new password</span>
+                            <input type="password" id="pwNew2" autocomplete="new-password" required minlength="6">
+                        </label>
+                        <p class="form-msg" id="pwMsg"></p>
+                        <button class="btn solid" type="submit">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="panel narrow">
+                    <div class="panel-head"><h2>Storage  Data</h2></div>
+                    <div class="storage-info" id="storageInfo"></div>
+                    <div class="danger-zone">
+                        <p>Resetting replaces your saved changes with the original store data. This cannot be undone.</p>
+                        <div class="danger-btns">
+                            <button class="btn ghost" id="resetProducts">Reset Products</button>
+                            <button class="btn ghost" id="resetContent">Reset Site Content</button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal (same pattern as the website) -->
+<div class="modal" id="modal">
+    <div class="modal-box" id="modalBox">
+        <button class="modal-close" id="modalClose" aria-label="Close"></button>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<div id="toastHost"></div>
+
+<script src="store.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

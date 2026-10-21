@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hycenth Stitches Collection</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand" data-page="home">
+        <span class="brand-main">Hycenth</span>
+        <span class="brand-sub">Stitches Collection</span>
+    </div>
+
+    <button class="menu-btn" id="menuBtn" aria-label="Menu"></button>
+
+    <nav class="nav" id="nav">
+        <a data-page="home" class="active">Home</a>
+        <a data-page="collection">Collection</a>
+            <a data-page="cart" class="cart-link" aria-label="Cart">
+                <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-text">Cart</span>
+                <span class="badge" id="cartBadge">0</span>
+            </a>
+        <a data-page="contact">Contact</a>
+    </nav>
+</header>
+
+<main>
+
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+        <div class="hero">
+            <div class="hero-deco" aria-hidden="true">
+                <svg class="deco deco-needle" viewBox="0 0 36 120">
+                    <path class="d-line" d="M18 14 V96"/>
+                    <ellipse class="d-line" cx="18" cy="12" rx="4.5" ry="7.5" fill="none"/>
+                    <path class="d-thread" d="M18 96 q2 12 12 14"/>
+                    <path class="d-fill" d="M18 96 l-3.5 14 h7 z"/>
+                </svg>
+                <svg class="deco deco-scissors" viewBox="0 0 24 24">
+                    <circle class="d-line" cx="6" cy="6" r="3" fill="none"/>
+                    <circle class="d-line" cx="6" cy="18" r="3" fill="none"/>
+                    <path class="d-line" d="M20 4 L8.12 15.88 M14.47 14.48 L20 20 M8.12 8.12 L12 12" fill="none"/>
+                </svg>
+                <svg class="deco deco-spool" viewBox="0 0 56 76">
+                    <rect class="d-fill" x="8" y="4" width="40" height="9" rx="3"/>
+                    <rect class="d-fill" x="8" y="63" width="40" height="9" rx="3"/>
+                    <rect class="d-thread-body" x="15" y="13" width="26" height="50"/>
+                    <path class="d-thread" d="M15 22 h26 M15 32 h26 M15 42 h26 M15 52 h26"/>
+                    <path class="d-thread" d="M41 20 q14 10 8 30"/>
+                </svg>
+                <svg class="deco deco-button" viewBox="0 0 64 64">
+                    <circle class="d-line" cx="32" cy="32" r="26" fill="none"/>
+                    <circle class="d-line-faint" cx="32" cy="32" r="19" fill="none"/>
+                    <circle class="d-fill" cx="25" cy="25" r="3.4"/>
+                    <circle class="d-fill" cx="39" cy="25" r="3.4"/>
+                    <circle class="d-fill" cx="25" cy="39" r="3.4"/>
+                    <circle class="d-fill" cx="39" cy="39" r="3.4"/>
+                    <path class="d-thread" d="M25 25 L39 39 M39 25 L25 39"/>
+                </svg>
+            </div>
+            <div class="hero-inner">
+                <p class="eyebrow">Tailored to fit. Stitched to last.</p>
+                <h1>Timeless Native Clinical Wear, <span>Made to Measure.</span></h1>
+                <p class="hero-text">
+                    Premium handcrafted Agbada, kaftans and professional nursing
+                    sets. Order online, pay your way, and we deliver to your door.
+                </p>
+                <div class="hero-btns">
+                    <button class="btn solid" data-page="collection">Shop Collection</button>
+                    <button class="btn ghost" data-page="contact">Contact Us</button>
+                </div>
+            </div>
+
+            <div class="hero-media" id="heroMedia">
+                <div class="hero-parallax" id="heroParallax">
+                    <div class="hero-track" id="heroTrack">
+                        <div class="slide active">
+                            <img src="https://images.pexels.com/photos/37340989/pexels-photo-37340989.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Nigerian man wearing a full-length traditional agbada outfit" loading="eager">
+                        </div>
+                        <div class="slide">
+                            <img src="https://images.pexels.com/photos/8526759/pexels-photo-8526759.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Royal agbada set" loading="lazy">
+                        </div>
+                        <div class="slide">
+                            <img src="https://images.pexels.com/photos/34821105/pexels-photo-34821105.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Heritage agbada three-piece outfit" loading="lazy">
+                        </div>
+                        <div class="slide">
+                            <img src="https://images.pexels.com/photos/35013624/pexels-photo-35013624.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Classic Yoruba agbada" loading="lazy">
+                        </div>
+                        <div class="slide">
+                            <img src="https://images.pexels.com/photos/37838842/pexels-photo-37838842.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Stylish purple agbada with cap" loading="lazy">
+                        </div>
+                        <div class="slide">
+                            <img src="https://images.pexels.com/photos/33642034/pexels-photo-33642034.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                                 alt="Beige traditional attire with matching cap" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+                <button class="hero-arrow" id="heroPrev" aria-label="Previous image"></button>
+                <button class="hero-arrow next" id="heroNext" aria-label="Next image"></button>
+                <div class="hero-dots" id="heroDots"></div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div>
+                <span class="feat-icon icon-stitch">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2.5v12.5"/>
+                        <ellipse cx="12" cy="4.5" rx="2" ry="3"/>
+                        <path d="M12 15c0 3 4 3.5 4 7" stroke-dasharray="2.5 2.5"/>
+                        <path d="M12 15l-1.6 6h3.2z" fill="currentColor" stroke="none"/>
+                    </svg>
+                </span>
+                <h3>Hand Stitched</h3><p>Skilled tailoring on quality fabrics.</p>
+            </div>
+            <div>
+                <span class="feat-icon icon-spool">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="4" y="2.5" width="16" height="3.5" rx="1.5"/>
+                        <rect x="4" y="18" width="16" height="3.5" rx="1.5"/>
+                        <path d="M7 6v12 M17 6v12"/>
+                        <path d="M7 9.5h10 M7 12h10 M7 14.5h10" stroke-dasharray="2 2"/>
+                    </svg>
+                </span>
+                <h3>Fast Delivery</h3><p>Nationwide dispatch within days.</p>
+            </div>
+            <div>
+                <span class="feat-icon icon-btn">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <circle cx="9.5" cy="9.5" r="1.1" fill="currentColor" stroke="none"/>
+                        <circle cx="14.5" cy="9.5" r="1.1" fill="currentColor" stroke="none"/>
+                        <circle cx="9.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/>
+                        <circle cx="14.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/>
+                    </svg>
+                </span>
+                <h3>Secure Payment</h3><p>Bank transfer or bank card.</p>
+            </div>
+            <div>
+                <span class="feat-icon icon-tape">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 9.5c3-3.5 15-3.5 18 0"/>
+                        <path d="M3 9.5v3.5 M7 7.4v2.7 M12 6.7v2.9 M17 7.4v2.7 M21 9.5v3.5"/>
+                    </svg>
+                </span>
+                <h3>Custom Fit</h3><p>Send your measurements, we sew to you.</p>
+            </div>
+        </div>
+
+        <div class="stitch-divider" aria-hidden="true">
+            <span class="stitch-needle">
+                <svg viewBox="0 0 18 46">
+                    <path class="sn-body" d="M9 9 V34"/>
+                    <ellipse class="sn-eye" cx="9" cy="7.5" rx="3" ry="5"/>
+                    <path class="sn-point" d="M9 34 l-2.5 10 h5 z"/>
+                    <path class="sn-thread" d="M9 8 q11 6 4 20"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- CRAFT -->
+        <section class="craft reveal">
+            <div class="craft-visual">
+                <svg class="sew-machine" viewBox="0 0 340 200" aria-hidden="true">
+                    <rect class="sm-table" x="14" y="152" width="312" height="10" rx="5"/>
+                    <path class="sm-stroke" d="M44 162 v28 M296 162 v28"/>
+
+                    <g class="sm-fabric">
+                        <rect class="sm-cloth" x="20" y="110" width="240" height="16" rx="3"/>
+                        <path class="sm-stitchline" d="M30 118 H250"/>
+                    </g>
+
+                    <rect class="sm-body" x="68" y="116" width="204" height="36" rx="7"/>
+                    <rect class="sm-body" x="210" y="56" width="54" height="64" rx="9"/>
+                    <rect class="sm-body" x="90" y="56" width="174" height="38" rx="13"/>
+                    <rect class="sm-body" x="82" y="56" width="52" height="56" rx="11"/>
+
+                    <g class="sm-needle">
+                        <rect class="sm-metal" x="102" y="92" width="8" height="28" rx="3.5"/>
+                        <path class="sm-stroke" d="M106 120 v9"/>
+                    </g>
+                    <path class="sm-metal" d="M96 116 h22 l-5 9 h-12 z"/>
+
+                    <g class="sm-wheel">
+                        <circle class="sm-stroke" cx="264" cy="78" r="25" fill="none"/>
+                        <circle class="sm-stroke" cx="264" cy="78" r="7" fill="none"/>
+                        <path class="sm-stroke-thin" d="M264 53 v13 M264 90 v13 M239 78 h13 M276 78 h13 M246.5 60.5 l9.5 9.5 M271.5 85.5 l9.5 9.5 M281.5 60.5 l-9.5 9.5 M256.5 85.5 l-9.5 9.5"/>
+                    </g>
+
+                    <g class="sm-spool">
+                        <rect class="sm-metal" x="226" y="28" width="20" height="6" rx="2.5"/>
+                        <rect class="sm-threadbody" x="230" y="34" width="12" height="20"/>
+                        <rect class="sm-metal" x="226" y="54" width="20" height="6" rx="2.5"/>
+                    </g>
+                    <path class="sm-threadline" d="M236 34 C 190 22 140 34 108 56"/>
+                </svg>
+            </div>
+            <div class="craft-copy">
+                <p class="eyebrow">The Craft</p>
+                <h2>Cut. Pin. Stitch. Pressed to Perfection.</h2>
+                <p class="craft-lead">
+                    Every Agbada, kaftan and nurse's uniform is drafted to your
+                    measurements and stitched by hand in our Aba workshop —
+                    no mass production, no shortcuts.
+                </p>
+                <ul class="craft-list">
+                    <li><span class="tick"></span>Pattern drafted to your exact body</li>
+                    <li><span class="tick"></span>Hand-finished embroidery hems</li>
+                    <li><span class="tick"></span>Pressed and quality-checked before dispatch</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="stitch-divider" aria-hidden="true">
+            <span class="stitch-needle">
+                <svg viewBox="0 0 18 46">
+                    <path class="sn-body" d="M9 9 V34"/>
+                    <ellipse class="sn-eye" cx="9" cy="7.5" rx="3" ry="5"/>
+                    <path class="sn-point" d="M9 34 l-2.5 10 h5 z"/>
+                    <path class="sn-thread" d="M9 8 q11 6 4 20"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- TRUST -->
+        <section class="trust reveal">
+            <div class="trust-head">
+                <div class="trust-seal"><span></span></div>
+                <div>
+                    <p class="eyebrow">Honest Business</p>
+                    <h2>We Don't Rip People Off. Ever.</h2>
+                    <p class="trust-lead">
+                        The price you see is the price you pay. No hidden
+                        charges, no surprise fees at checkout — just honest
+                        tailoring at a fair price, from people you can trust.
+                    </p>
+                </div>
+            </div>
+
+            <div class="trust-points">
+                <div class="trust-point">
+                    <span class="tick"></span>
+                    <div>
+                        <h3>What You See Is What You Pay</h3>
+                        <p>Every price on the tag is final. We never inflate it when you get to checkout.</p>
+                    </div>
+                </div>
+
+                <div class="trust-point">
+                    <span class="tick"></span>
+                    <div>
+                        <h3>No Hidden Charges</h3>
+                        <p>Delivery and totals are shown upfront — nothing extra is added later.</p>
+                    </div>
+                </div>
+
+                <div class="trust-point">
+                    <span class="tick"></span>
+                    <div>
+                        <h3>Pay Only When You're Sure</h3>
+                        <p>Choose bank transfer or bank card — you stay in control of your money.</p>
+                    </div>
+                </div>
+
+                <div class="trust-point">
+                    <span class="tick"></span>
+                    <div>
+                        <h3>We Make It Right</h3>
+                        <p>If the fit isn't right, we adjust it. Your satisfaction comes before our profit.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="stitch-divider" aria-hidden="true">
+            <span class="stitch-needle">
+                <svg viewBox="0 0 18 46">
+                    <path class="sn-body" d="M9 9 V34"/>
+                    <ellipse class="sn-eye" cx="9" cy="7.5" rx="3" ry="5"/>
+                    <path class="sn-point" d="M9 34 l-2.5 10 h5 z"/>
+                    <path class="sn-thread" d="M9 8 q11 6 4 20"/>
+                </svg>
+            </span>
+        </div>
+
+        <!-- DELIVERY -->
+        <section class="delivery reveal">
+            <div class="section-head">
+                <h2>We Deliver To Your Door</h2>
+                <p>From our needle to your doorstep — wherever you are in Nigeria.</p>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <h3>Place Your Order</h3>
+                    <p>Pick your pieces and check out in minutes.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <h3>We Tailor It</h3>
+                    <p>Your items are hand-stitched with care.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <h3>We Deliver It</h3>
+                    <p>Packed and dispatched straight to your address.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-num">4</span>
+                    <h3>You Love It</h3>
+                    <p>Try it on — if anything is off, we fix it free.</p>
+                </div>
+            </div>
+
+
+
+            <p class="delivery-note">
+                <span class="tick"></span>
+                Free delivery on every order over 100,000
+            </p>
+        </section>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="page" id="page-collection">
+        <div class="section-head">
+            <h2>Our Collection</h2>
+            <p>Men's native wear nurses' uniforms — click any item to add it to your cart.</p>
+        </div>
+
+        <div class="collection-bar">
+            <input type="search" id="searchInput" class="search-input" placeholder="Search collection...">
+            <select id="sortSelect" class="sort-select">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name">Name: A-Z</option>
+            </select>
+        </div>
+
+        <div class="filters" id="filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="men">Men's Native</button>
+            <button class="chip" data-filter="nurse">Nurses Wear</button>
+        </div>
+
+        <p class="product-count" id="productCount"></p>
+        <div class="grid" id="productGrid"></div>
+        <div class="load-more-wrap">
+            <button class="btn ghost" id="loadMoreBtn">Load More</button>
+        </div>
+    </section>
+
+    <!-- CART -->
+    <section class="page" id="page-cart">
+        <div class="section-head">
+            <h2>Your Cart</h2>
+            <p>Review your items, then send your order straight to our WhatsApp to pay.</p>
+        </div>
+
+        <div class="cart-wrap">
+            <div class="cart-items" id="cartItems"></div>
+
+            <aside class="summary">
+                <h3>Order Summary</h3>
+                <div class="row"><span>Items</span><span id="sumCount">0</span></div>
+                <div class="row"><span>Subtotal</span><span id="sumSub">0</span></div>
+                <div class="row"><span>Delivery</span><span id="sumDel">0</span></div>
+                <div class="row total"><span>Total</span><span id="sumTotal">0</span></div>
+
+                <div class="pay">
+                    <p class="pay-title">Payment Method</p>
+                    <label><input type="radio" name="pay" value="Transfer with Bank" checked> Transfer with Bank</label>
+                    <label><input type="radio" name="pay" value="Pay with Bank Card"> Pay with Bank Card</label>
+
+                    <div class="pay-account" id="payAccount">
+                        <p class="pay-account-title">Transfer to this account</p>
+                        <div class="acct-row"><span>Bank</span><strong>Moniepoint</strong></div>
+                        <div class="acct-row"><span>Account Name</span><strong>Martin Munachi Ejiofor</strong></div>
+                        <div class="acct-row">
+                            <span>Account Number</span>
+                            <span class="acct-no">
+                                <strong id="acctNumber">9165643642</strong>
+                                <button class="copy-btn" id="copyAcct" type="button">Copy</button>
+                            </span>
+                        </div>
+                        <p class="acct-note">Send your order on WhatsApp and we will share these details. After you transfer, send your proof of payment before we dispatch your order.</p>
+                    </div>
+
+                    <button class="btn solid full" id="checkout">Proceed to Payment</button>
+                    <p class="acct-note" style="text-align:center">Opens WhatsApp with your order and total, ready to send.</p>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="page" id="page-contact">
+        <div class="section-head">
+            <h2>Get In Touch</h2>
+            <p>Questions about sizing, bulk orders or delivery? We reply fast.</p>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <p><strong>Phone / WhatsApp</strong><br>
+                    <a class="link" data-s="phone" href="https://wa.me/2349165643642" target="_blank" rel="noopener">+234 91 6564 3642</a>
+                </p>
+                <p><strong>Email</strong><br>
+                    <a class="link" data-s="email" href="mailto:martinejiofor61@gmail.com">martinejiofor61@gmail.com</a>
+                </p>
+                <p><strong>Location</strong><br><span data-s="location">ABA, Nigeria</span></p>
+                <p class="social">Instagram TikTok  Facebook</p>
+                <a class="btn whatsapp" href="https://wa.me/2349165643642" target="_blank" rel="noopener">Chat on WhatsApp</a>
+            </div>
+
+            <form class="contact-form" id="contactForm"
+                  action="https://formsubmit.co/martinejiofor61@gmail.com" method="POST">
+                <input type="text" id="cName" name="name" placeholder="Your name" required>
+                <input type="email" id="cEmail" name="email" placeholder="Your email" required>
+                <textarea id="cMsg" name="message" rows="5" placeholder="Your message" required></textarea>
+                <input type="hidden" name="_subject" value="New message from Hycenth website">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_captcha" value="false">
+                <button class="btn solid full" type="submit">Send Message</button>
+                <p class="form-msg" id="formMsg"></p>
+            </form>
+        </div>
+    </section>
+
+</main>
+
+<footer class="site-footer">
+    <div class="footer-main">
+
+        <div class="footer-brand">
+            <div class="brand" data-page="home">
+                <span class="brand-main">Hycenth</span>
+                <span class="brand-sub">Stitches Collection</span>
+            </div>
+            <p>
+                Handcrafted Agbada, kaftans and professional nursing wear.
+                Tailored to fit, stitched to last delivered to your door
+                anywhere in Nigeria.
+            </p>
+            <div class="footer-social">
+                <a href="https://wa.me/2349165643642" target="_blank" rel="noopener">WhatsApp</a>
+                <span>Instagram</span>
+                <span>TikTok</span>
+                <span>Facebook</span>
+            </div>
+        </div>
+
+        <div class="footer-col">
+            <h4>Shop</h4>
+            <a data-page="home">Home</a>
+            <a data-page="collection">Collection</a>
+            <a data-page="cart">Your Cart</a>
+            <a data-page="contact">Contact Us</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Support</h4>
+            <a data-page="contact">Sizing Measurements</a>
+            <a data-page="contact">Bulk Corporate Orders</a>
+            <a data-page="contact">Delivery Returns</a>
+            <a href="https://wa.me/2349165643642" target="_blank" rel="noopener">Chat on WhatsApp</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Get In Touch</h4>
+            <p><strong>Phone / WhatsApp</strong><br>
+                <a class="inline" data-s="phone-f" href="https://wa.me/2349165643642" target="_blank" rel="noopener">+234 91 6564 3642</a>
+            </p>
+            <p><strong>Email</strong><br>
+                <a class="inline" data-s="email-f" href="mailto:martinejiofor61@gmail.com">martinejiofor61@gmail.com</a>
+            </p>
+            <p><strong>Location</strong><br><span data-s="location-f">Aba, Nigeria</span></p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <div class="footer-bottom-inner">
+            <p> 2026 Hycenth Stitches Collection. All rights reserved.</p>
+            <p>Handmade with care in Aba, Nigeria<a data-page="home">Back to top</a></p>
+        </div>
+    </div>
+</footer>
+
+<!-- RECEIPT MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <button class="modal-close" id="modalClose"></button>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script src="store.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
