@@ -1,7 +1,9 @@
 /* Product catalog + site settings come from the shared data store
-   (store.js) so the admin panel can manage them. */
-const products = HycenthStore.getProducts();
-const siteSettings = HycenthSettings.get();
+   (store.js) so the admin panel can manage them. Both are re-read
+   whenever the admin saves, so the page always shows the newest
+   version of the catalogue and the site content. */
+let products = HycenthStore.getProducts();
+let siteSettings = HycenthSettings.get();
 
 let DELIVERY = siteSettings.delivery.fee;
 let FREE_OVER = siteSettings.delivery.freeOver;
@@ -415,8 +417,11 @@ document.getElementById("contactForm").onsubmit = async e => {
     btn.disabled = true;
     msg.textContent = "Sending...";
 
+    /* where the enquiry goes — set in the admin panel */
+    const to = siteSettings.contact.email || "martinejiofor61@gmail.com";
+
     try {
-        const res = await fetch("https://formsubmit.co/ajax/martinejiofor61@gmail.com", {
+        const res = await fetch("https://formsubmit.co/ajax/" + to, {
             method: "POST",
             headers: { "Content-Type": "application/json", Accept: "application/json" },
             body: JSON.stringify({
@@ -440,7 +445,7 @@ document.getElementById("contactForm").onsubmit = async e => {
         const subject = encodeURIComponent(`Website enquiry from ${name}`);
         const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${text}`);
         window.location.href =
-            `mailto:martinejiofor61@gmail.com?subject=${subject}&body=${body}`;
+            `mailto:${to}?subject=${subject}&body=${body}`;
         msg.textContent = "Opening your email app instead...";
     } finally {
         btn.disabled = false;
@@ -515,11 +520,86 @@ function applySettings() {
         }
     });
 
+    /* bank details on the cart page — these come from the admin panel */
+    $$('[data-s="bank"]').forEach(el => { el.textContent = s.payment.bank; });
+    $$('[data-s="acctName"]').forEach(el => { el.textContent = s.payment.name; });
+    $$('[data-s="acctNumber"]').forEach(el => { el.textContent = s.payment.number; });
+
+    /* social links — a link with no address is hidden instead of
+       sending people to an empty page */
+    ["instagram", "tiktok", "facebook"].forEach(net => {
+        const url = (s.social && s.social[net]) || "";
+        $$(`[data-social="${net}"]`).forEach(a => {
+            if (url) {
+                a.href = url;
+                a.classList.remove("hidden");
+                a.removeAttribute("aria-hidden");
+            } else {
+                a.href = "#";
+                a.classList.add("hidden");
+                a.setAttribute("aria-hidden", "true");
+            }
+        });
+    });
+
+    /* the contact form posts to the address saved in the admin panel */
+    const contactForm = document.getElementById("contactForm");
+    if (contactForm) contactForm.action = "https://formsubmit.co/" + s.contact.email;
+
     /* delivery note */
     const note = $(".delivery-note");
     if (note) {
         note.innerHTML = `<span class="tick"></span> Free delivery on every order over ${money(s.delivery.freeOver)}`;
     }
+}
+
+/* ---------- LIVE SYNC WITH THE ADMIN PANEL ---------- */
+
+/* Re-reads the catalogue and the site content from the store and
+   repaints the page. Runs whenever the admin panel saves. */
+function reloadData() {
+    products = HycenthStore.getProducts();
+    siteSettings = HycenthSettings.get();
+    applySettings();
+    initHeroCarousel();
+    renderGrid();
+    renderCart();
+    updateBadge();
+}
+
+/* The admin panel and this page share the same browser storage. The
+   "storage" event fires in every OTHER tab when that storage
+   changes, so a save in the admin panel repaints this page at once
+   — no refresh needed. */
+window.addEventListener("storage", e => {
+    if (!e.key ||
+        e.key === "hycenth_products" ||
+        e.key === "hycenth_settings" ||
+        e.key === "hycenth_meta") {
+        reloadData();
+    }
+});
+
+/* ---- the published file (data.json) ----
+   localStorage only reaches the browser it lives in. To reach a
+   visitor on another phone or computer the admin panel publishes one
+   small file that sits beside index.html. The website loads it and
+   takes it if it is newer than what it already has. */
+const PUBLISHED_FILE = "data.json";
+
+async function checkPublished() {
+    if (!window.HycenthSync) return;
+    if (location.protocol === "file:") return; /* no fetch on a plain file */
+    try {
+        const res = await fetch(PUBLISHED_FILE + "?t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) return;
+        const payload = await res.json();
+        const result = HycenthSync.importData(payload);
+        if (result.applied) {
+            reloadData();
+            toast("Updated to the latest published version");
+        }
+    } catch (e) { /* no published file yet — keep showing the local copy */ }
 }
 
 /* ---------- INIT ---------- */
@@ -542,20 +622,30 @@ document.querySelectorAll(".reveal").forEach(el => revealer.observe(el));
 
 /* ---------- HERO CAROUSEL (auto slide) ---------- */
 const heroTrack = document.getElementById("heroTrack");
-const heroSlides = [...heroTrack.querySelectorAll(".slide")];
+let heroSlides = [];
 const heroDotsBox = document.getElementById("heroDots");
 let heroIndex = 0;
 let heroTimer;
 
-heroSlides.forEach((_, i) => {
-    const dot = document.createElement("button");
-    dot.setAttribute("aria-label", `Show image ${i + 1}`);
-    if (i === 0) dot.classList.add("active");
-    dot.addEventListener("click", () => { goHero(i); resetHeroTimer(); });
-    heroDotsBox.appendChild(dot);
-});
+/* Rebuilt whenever the slides change, so the carousel keeps working
+   after the admin panel swaps the images out. */
+function initHeroCarousel() {
+    heroSlides = [...heroTrack.querySelectorAll(".slide")];
+    heroDotsBox.innerHTML = "";
+    heroSlides.forEach((_, i) => {
+        const dot = document.createElement("button");
+        dot.setAttribute("aria-label", `Show image ${i + 1}`);
+        if (i === 0) dot.classList.add("active");
+        dot.addEventListener("click", () => { goHero(i); resetHeroTimer(); });
+        heroDotsBox.appendChild(dot);
+    });
+    heroIndex = 0;
+    if (heroSlides.length) goHero(0);
+    resetHeroTimer();
+}
 
 function goHero(i) {
+    if (!heroSlides.length) return;
     heroIndex = (i + heroSlides.length) % heroSlides.length;
     heroTrack.style.transform = `translateX(-${heroIndex * 100}%)`;
     heroSlides.forEach((s, n) => s.classList.toggle("active", n === heroIndex));
@@ -583,7 +673,7 @@ heroMedia.addEventListener("touchend", e => {
     touchX = null;
 }, { passive: true });
 
-resetHeroTimer();
+initHeroCarousel();
 
 /* ---------- HERO SCROLL PARALLAX ---------- */
 const heroParallaxEl = document.getElementById("heroParallax");
@@ -603,3 +693,13 @@ window.addEventListener("scroll", () => {
         heroTicking = false;
     });
 }, { passive: true });
+
+/* ---------- PUBLISHED FILE WATCHER ----------
+   Looks for a newer published file on load, when the tab comes back
+   to the front, and once a minute. */
+checkPublished();
+setInterval(checkPublished, 60000);
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkPublished();
+});
+window.addEventListener("focus", checkPublished);

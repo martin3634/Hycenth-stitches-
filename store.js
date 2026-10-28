@@ -10,7 +10,9 @@
         products: "hycenth_products",
         settings: "hycenth_settings",
         account: "hycenth_admin_acc",
-        session: "hycenth_session"
+        session: "hycenth_session",
+        meta: "hycenth_meta",
+        sync: "hycenth_sync"
     };
 
     var SESSION_MS = 8 * 60 * 60 * 1000; /* 8 hours */
@@ -18,7 +20,7 @@
 
     /* Pre-seeded admin account. Only the salted FNV hash lives in the
        source; the password is given to the owner out-of-band. */
-    var SEED_ADMIN = { user: "admin", hash: "fnv2ef14ddb" };
+    var SEED_ADMIN = { user: "munachi", hash: "fnv2ef14ddb" };
     var SEED_FLAG = "hycenth_admin_seeded";
 
     /* ============================================================
@@ -170,6 +172,11 @@
             email: "martinejiofor61@gmail.com",
             location: "ABA, Nigeria"
         },
+        social: {
+            instagram: "",
+            tiktok: "",
+            facebook: ""
+        },
         delivery: { fee: 3500, freeOver: 100000 },
         payment: {
             bank: "Moniepoint",
@@ -250,6 +257,45 @@
     }
 
     /* ============================================================
+       VERSION META
+       Every write to the catalogue or the site content bumps a
+       version number. That number is what tells the website
+       whether the copy it is looking at is older or newer than
+       what the admin panel just saved.
+       ============================================================ */
+
+    var meta = {
+        get: function () {
+            var m = readJSON(KEYS.meta);
+            if (!m || typeof m !== "object") m = {};
+            if (typeof m.version !== "number" || !isFinite(m.version)) m.version = 0;
+            return m;
+        },
+
+        version: function () {
+            return meta.get().version;
+        },
+
+        /* always moves forward, even when two saves land in the
+           same millisecond */
+        bump: function () {
+            var m = meta.get();
+            m.version = Math.max(Date.now(), (m.version || 0) + 1);
+            m.updatedAt = Date.now();
+            writeJSON(KEYS.meta, m);
+            return m.version;
+        },
+
+        set: function (version, updatedAt) {
+            var v = Number(version) || 0;
+            var m = meta.get();
+            if (v < (m.version || 0)) return m.version;
+            writeJSON(KEYS.meta, { version: v, updatedAt: updatedAt || Date.now() });
+            return v;
+        }
+    };
+
+    /* ============================================================
        VALIDATION / SANITISING
        ============================================================ */
 
@@ -304,6 +350,9 @@
         }
         ["phone", "whatsapp", "email", "location"].forEach(function (k) {
             if (raw.contact && raw.contact[k] != null) base.contact[k] = cleanText(raw.contact[k], 80);
+        });
+        ["instagram", "tiktok", "facebook"].forEach(function (k) {
+            if (raw.social && raw.social[k] != null) base.social[k] = cleanText(raw.social[k], 300);
         });
         if (raw.delivery) {
             base.delivery.fee = Math.max(0, cleanNumber(raw.delivery.fee, base.delivery.fee));
@@ -463,6 +512,31 @@
                 acc.alg = alg;
                 writeJSON(KEYS.account, acc);
                 return true;
+            });
+        },
+
+        changeUsername: function (newUsername, password) {
+            var acc = readJSON(KEYS.account);
+            if (!acc) return Promise.reject(new Error("No admin account exists yet."));
+            newUsername = cleanText(newUsername, 40);
+            if (newUsername.length < 3) return Promise.reject(new Error("Username must be at least 3 characters."));
+
+            return hashPassword(password, acc.alg || "fnv").then(function (hash) {
+                if (hash !== acc.hash) throw new Error("Password is incorrect.");
+                acc.user = newUsername;
+                writeJSON(KEYS.account, acc);
+                /* update session if exists */
+                try {
+                    var raw = global.sessionStorage.getItem(KEYS.session);
+                    if (raw) {
+                        var s = JSON.parse(raw);
+                        if (s) {
+                            s.user = newUsername;
+                            global.sessionStorage.setItem(KEYS.session, JSON.stringify(s));
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+                return newUsername;
             });
         },
 
@@ -682,6 +756,7 @@
             var product = Object.assign({ id: maxId + 1, createdAt: Date.now(), updatedAt: null }, clean);
             list.push(product);
             writeJSON(KEYS.products, list);
+            meta.bump();
             return product;
         },
 
@@ -702,6 +777,7 @@
 
             list[idx] = Object.assign({}, list[idx], clean, { updatedAt: Date.now() });
             writeJSON(KEYS.products, list);
+            meta.bump();
             return list[idx];
         },
 
@@ -726,12 +802,15 @@
                     global.localStorage.setItem("hycenth_cart", JSON.stringify(cart));
                 }
             } catch (e) { /* ignore */ }
+            meta.bump();
             return true;
         },
 
         resetProducts: function () {
             Auth.assert();
-            return seedProducts();
+            var list = seedProducts();
+            meta.bump();
+            return list;
         },
 
         /* ---- stats ---- */
@@ -800,12 +879,14 @@
                 hero: Object.assign({}, current.hero, patch.hero || {}),
                 features: patch.features && Array.isArray(patch.features) ? patch.features : current.features,
                 contact: Object.assign({}, current.contact, patch.contact || {}),
+                social: Object.assign({}, current.social, patch.social || {}),
                 delivery: Object.assign({}, current.delivery, patch.delivery || {}),
                 payment: Object.assign({}, current.payment, patch.payment || {}),
                 order: Object.assign({}, current.order, patch.order || {})
             };
             var clean = cloneSettings(next);
             writeJSON(KEYS.settings, clean);
+            meta.bump();
             return clean;
         },
 
@@ -813,7 +894,167 @@
             Auth.assert();
             var defaults = cloneSettings(null);
             writeJSON(KEYS.settings, defaults);
+            meta.bump();
             return defaults;
+        }
+    };
+
+    /* ============================================================
+       SYNC — how an admin edit reaches the website
+       The admin panel saves into this browser's localStorage.
+       To reach a visitor on another phone or computer the data
+       travels as one small JSON file (data.json) that the website
+       loads from beside index.html. The version number decides
+       which copy is newer.
+       ============================================================ */
+
+    function normalizeImportedProduct(p, fallbackId) {
+        var base = validateProduct(p); /* throws when the entry is broken */
+        return {
+            id: Number(p.id) || fallbackId,
+            name: base.name,
+            cat: base.cat,
+            price: base.price,
+            img: base.img,
+            tag: base.tag,
+            desc: base.desc,
+            visible: base.visible,
+            createdAt: Number(p.createdAt) || Date.now(),
+            updatedAt: p.updatedAt == null ? null : Number(p.updatedAt)
+        };
+    }
+
+    var Sync = {
+        /* ---- the file that travels to the website ---- */
+        exportData: function () {
+            var m = meta.get();
+            /* the very first publish still has to carry a version, so a
+               fresh visitor knows the file is newer than nothing */
+            if (!m.version) m.version = meta.bump();
+            return {
+                version: m.version,
+                updatedAt: m.updatedAt || Date.now(),
+                products: Store.getProducts(),
+                settings: Settings.get()
+            };
+        },
+
+        exportJSON: function () {
+            return JSON.stringify(Sync.exportData(), null, 2);
+        },
+
+        /* ---- reading a published file on the website ---- */
+        importData: function (payload) {
+            if (!payload || typeof payload !== "object") {
+                return { applied: false, reason: "The file is not valid JSON." };
+            }
+            var local = meta.version();
+            var remote = Number(payload.version) || 0;
+            if (!remote) {
+                return { applied: false, reason: "The file has no version number." };
+            }
+            if (remote <= local) {
+                return {
+                    applied: false,
+                    stale: true,
+                    reason: "The published file is older than the copy already on this device.",
+                    version: remote
+                };
+            }
+            if (!Array.isArray(payload.products) || !payload.products.length) {
+                return { applied: false, reason: "The file has no products." };
+            }
+            if (!payload.settings || typeof payload.settings !== "object") {
+                return { applied: false, reason: "The file has no site content." };
+            }
+
+            var clean = [];
+            var used = {};
+            var nextId = 1;
+            payload.products.forEach(function (p) {
+                var item;
+                try { item = normalizeImportedProduct(p, nextId); } catch (e) { return; }
+                if (used[item.id]) { nextId = nextId + 1; item.id = nextId; }
+                used[item.id] = true;
+                nextId = Math.max(nextId, item.id) + 1;
+                clean.push(item);
+            });
+            if (!clean.length) {
+                return { applied: false, reason: "Every product in the file was unreadable." };
+            }
+
+            var settings;
+            try { settings = cloneSettings(payload.settings); } catch (e) {
+                return { applied: false, reason: "The site content in the file could not be read." };
+            }
+
+            writeJSON(KEYS.products, clean);
+            writeJSON(KEYS.settings, settings);
+            meta.set(remote, payload.updatedAt);
+
+            /* drop cart lines that point at products that no longer exist */
+            try {
+                var cart = JSON.parse(global.localStorage.getItem("hycenth_cart")) || {};
+                var alive = {};
+                clean.forEach(function (p) { alive[p.id] = true; });
+                var changed = false;
+                Object.keys(cart).forEach(function (id) {
+                    if (!alive[id]) { delete cart[id]; changed = true; }
+                });
+                if (changed) global.localStorage.setItem("hycenth_cart", JSON.stringify(cart));
+            } catch (e) { /* ignore */ }
+
+            return { applied: true, version: remote, products: clean.length };
+        },
+
+        /* ---- how the file is delivered ---- */
+        config: function () {
+            var c = readJSON(KEYS.sync);
+            if (!c || typeof c !== "object") c = {};
+            return {
+                endpoint: typeof c.endpoint === "string" ? c.endpoint : "",
+                autoPush: c.autoPush === true,
+                lastPush: Number(c.lastPush) || 0,
+                lastPushOk: c.lastPushOk === true
+            };
+        },
+
+        setConfig: function (patch) {
+            var c = Sync.config();
+            if (patch.endpoint != null) c.endpoint = cleanText(patch.endpoint, 300);
+            if (patch.autoPush != null) c.autoPush = !!patch.autoPush;
+            writeJSON(KEYS.sync, c);
+            return c;
+        },
+
+        notePush: function (ok) {
+            var c = Sync.config();
+            c.lastPush = Date.now();
+            c.lastPushOk = !!ok;
+            writeJSON(KEYS.sync, c);
+            return c;
+        },
+
+        /* sends the payload to an endpoint that accepts a JSON POST */
+        push: function (url) {
+            url = cleanText(url || Sync.config().endpoint, 300);
+            if (!url) return Promise.reject(new Error("Set a publish endpoint first."));
+            if (!/^https?:\/\//i.test(url)) {
+                return Promise.reject(new Error("The endpoint must be an http(s) URL."));
+            }
+            var payload = Sync.exportData();
+            return fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify(payload)
+            }).then(function (res) {
+                if (!res.ok) throw new Error("The endpoint replied with " + res.status + ".");
+                Sync.notePush(true);
+                return payload;
+            }).catch(function (err) {
+                Sync.notePush(false);
+                throw err;
+            });
         }
     };
 
@@ -824,6 +1065,7 @@
     global.HycenthStore = Store;
     global.HycenthSettings = Settings;
     global.HycenthAuth = Auth;
+    global.HycenthSync = Sync;
     global.HycenthDefaults = clone(DEFAULT_SETTINGS);
 
 })(typeof window !== "undefined" ? window : globalThis);

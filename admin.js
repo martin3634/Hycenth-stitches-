@@ -10,6 +10,7 @@
     var Store = window.HycenthStore;
     var Settings = window.HycenthSettings;
     var Auth = window.HycenthAuth;
+    var Sync = window.HycenthSync;
 
     /* ---------- helpers ---------- */
     function qs(sel, root) { return (root || document).querySelector(sel); }
@@ -706,6 +707,7 @@
                 Store.setVisibility(id, product.visible === false);
                 renderProducts();
                 toast(product.visible === false ? "Item is now hidden" : "Item is now visible");
+                afterSave();
             } catch (err) { toast(err.message, true); }
         } else if (act === "edit") {
             openProductForm(product);
@@ -722,6 +724,7 @@
                     renderProducts();
                     renderDashboard();
                     toast("Item deleted");
+                    afterSave();
                 } catch (err) { toast(err.message, true); }
             });
         }
@@ -869,6 +872,7 @@
                 renderProducts();
                 renderDashboard();
                 toast(isEdit ? "Product updated" : "Product added");
+                afterSave();
             }).catch(function (err) {
                 msg.textContent = err.message || "Could not save the product.";
                 msg.className = "form-msg err";
@@ -908,6 +912,9 @@
         qs("#cWa").value = s.contact.whatsapp;
         qs("#cMail").value = s.contact.email;
         qs("#cLoc").value = s.contact.location;
+        qs("#cInstagram").value = (s.social && s.social.instagram) || "";
+        qs("#cTiktok").value = (s.social && s.social.tiktok) || "";
+        qs("#cFacebook").value = (s.social && s.social.facebook) || "";
         qs("#dFee").value = s.delivery.fee;
         qs("#dFree").value = s.delivery.freeOver;
 
@@ -998,6 +1005,7 @@
                 renderSlides(valid);
                 savedMsg("#heroMsg", "Hero saved ✓");
                 toast("Hero section updated");
+                afterSave();
             }).catch(function (err) {
                 qs("#heroMsg").textContent = err.message || "Could not save.";
                 qs("#heroMsg").className = "form-msg err";
@@ -1020,6 +1028,7 @@
             Settings.update({ features: features });
             savedMsg("#featMsg", "Features saved ✓");
             toast("Feature cards updated");
+            afterSave();
         } catch (err) {
             qs("#featMsg").textContent = err.message;
             qs("#featMsg").className = "form-msg err";
@@ -1042,6 +1051,11 @@
                     email: qs("#cMail").value,
                     location: qs("#cLoc").value
                 },
+                social: {
+                    instagram: qs("#cInstagram").value,
+                    tiktok: qs("#cTiktok").value,
+                    facebook: qs("#cFacebook").value
+                },
                 delivery: {
                     fee: Number(qs("#dFee").value) || 0,
                     freeOver: Number(qs("#dFree").value) || 0
@@ -1049,6 +1063,7 @@
             });
             savedMsg("#contactMsg", "Saved ✓");
             toast("Contact & delivery updated");
+            afterSave();
         } catch (err) {
             qs("#contactMsg").textContent = err.message;
             qs("#contactMsg").className = "form-msg err";
@@ -1067,6 +1082,7 @@
             });
             savedMsg("#payMsg", "Saved ✓");
             toast("Payment details updated");
+            afterSave();
         } catch (err) {
             qs("#payMsg").textContent = err.message;
             qs("#payMsg").className = "form-msg err";
@@ -1249,6 +1265,7 @@
             });
             msg.textContent = "Saved ✓";
             toast("Order message settings updated");
+            afterSave();
         } catch (err) {
             msg.textContent = err.message || "Could not save.";
             msg.className = "form-msg err";
@@ -1271,6 +1288,15 @@
 
         qs("#recEmail").value = Auth.email();
         qs("#recEndpoint").value = Auth.otpEndpoint();
+
+        if (Sync) {
+            var cfg = Sync.config();
+            var ep = qs("#pubEndpoint");
+            if (ep) ep.value = cfg.endpoint;
+            var au = qs("#pubAuto");
+            if (au) au.checked = cfg.autoPush;
+        }
+        renderPublish();
     }
 
     qs("#recForm").addEventListener("submit", function (e) {
@@ -1295,7 +1321,7 @@
         var next2 = qs("#pwNew2").value;
         var msg = qs("#pwMsg");
         msg.className = "form-msg";
-
+ 
         if (next !== next2) {
             msg.textContent = "New passwords do not match.";
             msg.className = "form-msg err";
@@ -1313,6 +1339,141 @@
         });
     });
 
+    var unameForm = qs("#unameForm");
+    if (unameForm) {
+        unameForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var newU = qs("#unameNew").value;
+            var pass = qs("#unamePass").value;
+            var msg = qs("#unameMsg");
+            if (!msg) return;
+            msg.className = "form-msg";
+            if (!Auth.changeUsername) {
+                msg.textContent = "Feature not available.";
+                msg.className = "form-msg err";
+                return;
+            }
+            withLoading(qs('button[type="submit"]', e.target), function () {
+                return Auth.changeUsername(newU, pass);
+            }).then(function (u) {
+                unameForm.reset();
+                msg.textContent = "Username updated ✓";
+                toast("Username changed to " + u);
+                try { renderAccount(); } catch (e) { /* ignore */ }
+                try {
+                    var top = qs("#topUser");
+                    if (top) top.textContent = u;
+                } catch (e) { /* ignore */ }
+            }).catch(function (err) {
+                msg.textContent = err.message || "Could not update username.";
+                msg.className = "form-msg err";
+            });
+        });
+    }
+
+    /* ============================================================
+       PUBLISH
+       The shop data lives in this browser. Publishing writes it out
+       as one small file (data.json) that the website loads from
+       beside index.html, so an edit reaches every visitor — not
+       only the browsers this admin panel has touched.
+       ============================================================ */
+    function renderPublish() {
+        var box = qs("#pubStatus");
+        if (!box) return;
+        if (!Sync) {
+            box.innerHTML =
+                '<span class="storage-pill" style="color:#ffb3b3">store.js is out of date — reload the page</span>';
+            return;
+        }
+        var cfg = Sync.config();
+        var data = Sync.exportData();
+        var when = cfg.lastPush
+            ? fmtDate(cfg.lastPush) + (cfg.lastPushOk ? " · sent" : " · failed")
+            : "not sent yet";
+        box.innerHTML =
+            '<span class="storage-pill"><strong>' + data.products.length + "</strong> products ready</span>" +
+            '<span class="storage-pill">Version <strong>' + data.version + "</strong></span>" +
+            '<span class="storage-pill">Last push: <strong>' + when + "</strong></span>";
+    }
+
+    function pushNow(quiet) {
+        if (!Sync) return Promise.resolve(false);
+        var msg = qs("#pubMsg");
+        var cfg = Sync.config();
+        if (!cfg.endpoint) {
+            if (!quiet && msg) {
+                msg.textContent =
+                    "Set a publish endpoint first, or download data.json and upload it next to index.html.";
+                msg.className = "form-msg err";
+            }
+            return Promise.resolve(false);
+        }
+        return Sync.push(cfg.endpoint).then(function () {
+            renderPublish();
+            if (!quiet && msg) {
+                msg.textContent = "Published. The website picks it up within a minute.";
+                msg.className = "form-msg";
+                toast("Published to the website");
+            }
+            return true;
+        }).catch(function (err) {
+            renderPublish();
+            if (!quiet && msg) {
+                msg.textContent = err.message || "Could not push.";
+                msg.className = "form-msg err";
+            }
+            return false;
+        });
+    }
+
+    /* called after every change so the publish status stays honest */
+    function afterSave() {
+        renderPublish();
+        if (Sync && Sync.config().autoPush) pushNow(true);
+    }
+
+    /* the publish panel is only in the newest admin.html — the panel
+       stays usable if a browser still has an older copy cached */
+    function onPub(id, event, fn) {
+        var el = qs("#" + id);
+        if (el) el.addEventListener(event, fn);
+    }
+
+    onPub("pubDownload", "click", function () {
+        if (!Sync) return;
+        var blob = new Blob([Sync.exportJSON()], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "data.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        toast("data.json downloaded — upload it next to index.html");
+    });
+
+    onPub("pubCopy", "click", function () {
+        if (!Sync) return;
+        copyText(Sync.exportJSON(), qs("#pubCopy"), "JSON copied");
+    });
+
+    onPub("pubPush", "click", function () { pushNow(false); });
+
+    onPub("pubEndpoint", "change", function () {
+        if (!Sync) return;
+        Sync.setConfig({ endpoint: qs("#pubEndpoint").value });
+        renderPublish();
+        toast("Publish endpoint saved");
+    });
+
+    onPub("pubAuto", "change", function () {
+        if (!Sync) return;
+        Sync.setConfig({ autoPush: qs("#pubAuto").checked });
+        renderPublish();
+    });
+
     qs("#resetProducts").addEventListener("click", function () {
         confirmDialog({
             title: "Reset all products?",
@@ -1326,6 +1487,7 @@
                 renderAccount();
                 renderDashboard();
                 toast("Products reset to defaults");
+                afterSave();
             } catch (err) { toast(err.message, true); }
         });
     });
@@ -1342,6 +1504,7 @@
                 Settings.reset();
                 fillContentForms();
                 toast("Site content reset to defaults");
+                afterSave();
             } catch (err) { toast(err.message, true); }
         });
     });

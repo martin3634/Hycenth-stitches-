@@ -189,7 +189,7 @@
             </button>
             <button class="side-link" data-view="account">
                 <svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm-8 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.3 0-7 1.2-7 3.5V20h9v-2.5c0-1 .4-1.9 1-2.6A13 13 0 0 0 8 14zm8 0c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg>
-                Account  Data
+                Account &amp; Data
             </button>
         </nav>
 
@@ -344,7 +344,7 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-head"><h2>Contact  Delivery</h2></div>
+                    <div class="panel-head"><h2>Contact &amp; Delivery</h2></div>
                     <form id="contactForm2" class="cform">
                         <div class="frow">
                             <label class="field">
@@ -361,14 +361,29 @@
                                 <span>Email</span>
                                 <input type="email" id="cMail" maxlength="80">
                             </label>
-                            <label class="field">
-                                <span>Location</span>
-                                <input type="text" id="cLoc" maxlength="80">
-                            </label>
-                        </div>
+                        <label class="field">
+                            <span>Location</span>
+                            <input type="text" id="cLoc" maxlength="80">
+                        </label>
+                    </div>
+                    <p class="sub-label">Social links (leave empty to hide them)</p>
+                    <div class="frow">
+                        <label class="field">
+                            <span>Instagram</span>
+                            <input type="url" id="cInstagram" maxlength="300" placeholder="https://instagram.com/...">
+                        </label>
+                        <label class="field">
+                            <span>TikTok</span>
+                            <input type="url" id="cTiktok" maxlength="300" placeholder="https://tiktok.com/@...">
+                        </label>
+                    </div>
+                    <label class="field">
+                        <span>Facebook</span>
+                        <input type="url" id="cFacebook" maxlength="300" placeholder="https://facebook.com/...">
+                    </label>
                         <div class="frow">
                             <label class="field">
-                                <span>Delivery fee </span>
+                                <span>Delivery fee (&#8378;)</span>
                                 <input type="number" id="dFee" min="0" step="100">
                             </label>
                             <label class="field">
@@ -377,7 +392,7 @@
                             </label>
                         </div>
                         <p class="form-msg" id="contactMsg"></p>
-                        <button class="btn solid" type="submit">Save Contact Delivery</button>
+                        <button class="btn solid" type="submit">Save Contact &amp; Delivery</button>
                     </form>
                 </div>
 
@@ -522,6 +537,37 @@
             <section class="aview" id="view-account">
 
                 <div class="panel narrow">
+                    <div class="panel-head"><h2>Publish to Website</h2></div>
+                    <p class="tool-lead">
+                        Your catalogue and site content are saved in this browser. Publish
+                        them to <code>data.json</code> and upload that one file next to
+                        <code>index.html</code> on your host — then every visitor, on any
+                        phone or computer, sees your latest changes.
+                    </p>
+                    <div class="storage-info" id="pubStatus"></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn ghost" id="pubCopy">Copy JSON</button>
+                        <button type="button" class="btn solid" id="pubDownload">Download data.json</button>
+                    </div>
+
+                    <label class="field" style="margin-top:1.2rem">
+                        <span>Auto-push endpoint (optional)</span>
+                        <input type="url" id="pubEndpoint" maxlength="300"
+                               placeholder="https://script.google.com/.../exec">
+                        <span class="hint">An address that accepts a JSON POST. Set it once and
+                            the panel pushes the file for you every time you save.</span>
+                    </label>
+                    <label class="check">
+                        <input type="checkbox" id="pubAuto">
+                        <span>Push automatically after every change</span>
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn ghost" id="pubPush">Push now</button>
+                    </div>
+                    <p class="form-msg" id="pubMsg"></p>
+                </div>
+
+                <div class="panel narrow">
                     <div class="panel-head"><h2>Password Recovery</h2></div>
                     <form id="recForm" class="cform">
                         <label class="field">
@@ -540,6 +586,22 @@
 
                         <p class="form-msg" id="recMsg"></p>
                         <button class="btn solid" type="submit">Save Recovery Settings</button>
+                    </form>
+                </div>
+
+                <div class="panel narrow">
+                    <div class="panel-head"><h2>Change Username</h2></div>
+                    <form id="unameForm" class="cform">
+                        <label class="field">
+                            <span>New username</span>
+                            <input type="text" id="unameNew" autocomplete="username" required minlength="3" placeholder="At least 3 characters">
+                        </label>
+                        <label class="field">
+                            <span>Password (to confirm)</span>
+                            <input type="password" id="unamePass" autocomplete="current-password" required>
+                        </label>
+                        <p class="form-msg" id="unameMsg"></p>
+                        <button class="btn solid" type="submit">Update Username</button>
                     </form>
                 </div>
 
@@ -564,7 +626,7 @@
                 </div>
 
                 <div class="panel narrow">
-                    <div class="panel-head"><h2>Storage  Data</h2></div>
+                    <div class="panel-head"><h2>Storage &amp; Data</h2></div>
                     <div class="storage-info" id="storageInfo"></div>
                     <div class="danger-zone">
                         <p>Resetting replaces your saved changes with the original store data. This cannot be undone.</p>

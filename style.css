@@ -25,6 +25,9 @@ body {
 
 img { display: block; max-width: 100%; }
 
+/* used when an admin-editable item has no address yet */
+.hidden { display: none !important; }
+
 /* ---------- HEADER ---------- */
 .site-header {
     position: sticky;
